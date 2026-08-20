@@ -1,0 +1,23 @@
+# bexio-cli
+
+> Command-line client for the bexio business software: contacts, quotes,
+> sales orders, invoices (with payments and reminders), items & stock,
+> deliveries, projects & timesheets, notes & tasks, and master data.
+> Single static Go binary, configured via ~/.config/bexio/config.yml or the
+> BEXIO_TOKEN environment variable; supports several bexio companies as
+> named instances.
+
+The CLI is self-documenting for LLMs: run `bexio docs` for the complete
+command reference in one page. Every read command supports `-o json`,
+printing the raw bexio API objects.
+
+## Docs
+
+- [README](https://github.com/lukeisontheroad/bexio-cli/blob/main/README.md): install, auth, usage
+- [Agent skill](https://github.com/lukeisontheroad/bexio-cli/blob/main/skills/bexio/SKILL.md): drop-in skill for AI agents operating the CLI
+- [CONTRIBUTING](https://github.com/lukeisontheroad/bexio-cli/blob/main/CONTRIBUTING.md): commit convention, release automation
+- [CLAUDE.md](https://github.com/lukeisontheroad/bexio-cli/blob/main/CLAUDE.md): architecture and bexio API facts for coding agents
+
+## Optional
+
+- [bexio API docs](https://docs.bexio.com): upstream REST API reference

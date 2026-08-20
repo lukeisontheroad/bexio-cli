@@ -1,0 +1,16 @@
+# Build artifacts
+bin/
+dist/
+*.exe
+
+# Test & coverage
+*.test
+coverage.out
+coverage.html
+
+# Go workspace (local-only)
+go.work
+go.work.sum
+
+# IDE / editor
+.idea/
