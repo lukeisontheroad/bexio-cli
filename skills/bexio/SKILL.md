@@ -22,9 +22,11 @@ available names. A single configured company is used automatically.
 
 ## Reference
 
-Run `bexio docs` once — it prints the complete command reference (all
-commands, flags, search syntax, and document workflows) in a single page
-designed for LLM consumption. Prefer it over multiple `--help` calls.
+Run `bexio docs` once — a compact page (setup, conventions, search syntax,
+document workflows, command index) designed to stay in context. For the
+subcommands, flags, and examples of one resource, fetch on demand:
+`bexio docs <command>` (e.g. `bexio docs kb-invoice`). Avoid
+`bexio docs --full` — it prints ~2000 lines.
 
 ## Rules
 

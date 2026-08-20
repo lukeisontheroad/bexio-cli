@@ -84,7 +84,7 @@ bexio --instance freelance-gmbh contact list
 | `bexio currency/tax/bank-account/user/company-profile/permission …` | 3.0 master data |
 | `bexio api METHOD /2.0/…` | raw authenticated request to any endpoint |
 | `bexio auth login/status/logout` | authentication (OAuth module checklist or PAT) |
-| `bexio docs` | full reference on one page (for LLM/agent use) |
+| `bexio docs [command]` | compact LLM reference; per-command details on demand (`--full` for everything) |
 
 Quote/order/invoice positions use compact specs:
 

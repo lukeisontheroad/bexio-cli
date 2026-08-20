@@ -9,6 +9,6 @@ Commit style is Conventional Commits — see [CONTRIBUTING.md](CONTRIBUTING.md);
 commits drive the automated changelog and semantic version.
 
 If you are an agent *using* the installed `bexio` CLI (rather than developing
-it), run `bexio docs` — it prints the complete command reference in one page,
-written for LLM consumption. A ready-made skill is in
-[skills/bexio/SKILL.md](skills/bexio/SKILL.md).
+it), run `bexio docs` — a compact reference written for LLM consumption —
+and `bexio docs <command>` for per-resource details on demand. A ready-made
+skill is in [skills/bexio/SKILL.md](skills/bexio/SKILL.md).

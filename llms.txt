@@ -7,8 +7,10 @@
 > BEXIO_TOKEN environment variable; supports several bexio companies as
 > named instances.
 
-The CLI is self-documenting for LLMs: run `bexio docs` for the complete
-command reference in one page. Every read command supports `-o json`,
+The CLI is self-documenting for LLMs: run `bexio docs` for a compact
+reference (conventions, search syntax, command index), then
+`bexio docs <command>` for one resource's details on demand
+(`--full` prints everything). Every read command supports `-o json`,
 printing the raw bexio API objects.
 
 ## Docs

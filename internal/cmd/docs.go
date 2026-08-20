@@ -3,26 +3,91 @@ package cmd
 import (
 	"fmt"
 	"io"
+	"strings"
 
 	"github.com/spf13/cobra"
 )
 
-// newDocsCmd prints the complete CLI reference in one shot. Intended for
-// piping into LLM/agent context: `bexio docs` yields everything needed to
-// operate the tool without further --help calls.
+// newDocsCmd prints the CLI reference for LLM/agent consumption. The bare
+// command stays deliberately small (conventions + command index, ~2k
+// tokens) so it can sit in an agent's context without crowding it;
+// per-command details are fetched on demand with `docs <command>`, and
+// `--full` dumps everything for offline use.
 func newDocsCmd() *cobra.Command {
-	return &cobra.Command{
-		Use:   "docs",
-		Short: "Print the complete CLI reference (optimized for LLMs/agents)",
-		Args:  cobra.NoArgs,
+	var full bool
+	cmd := &cobra.Command{
+		Use:   "docs [command]",
+		Short: "Print the CLI reference (optimized for LLMs/agents)",
+		Long: `Print the CLI reference, written for LLM/agent consumption.
+
+Without arguments: setup, conventions, search syntax, document workflows,
+and a one-line index of every command — compact enough to keep in context.
+With a command name ("bexio docs kb-invoice"): all subcommands, flags, and
+examples of that command only. --full prints everything at once.`,
+		Args: cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			out := cmd.OutOrStdout()
+			root := cmd.Root()
+			if len(args) == 1 {
+				target := findCommand(root, args[0])
+				if target == nil {
+					return fmt.Errorf("unknown command %q: run `bexio docs` for the index", args[0])
+				}
+				printCmdDocs(out, target)
+				return nil
+			}
 			fmt.Fprint(out, docsHeader)
-			printCmdDocs(out, cmd.Root())
+			if full {
+				printCmdDocs(out, root)
+			} else {
+				printCmdIndex(out, root)
+			}
 			fmt.Fprint(out, docsFooter)
 			return nil
 		},
 	}
+	cmd.Flags().BoolVar(&full, "full", false, "print every subcommand with flags and examples (long)")
+	return cmd
+}
+
+// findCommand resolves a top-level command by name or alias.
+func findCommand(root *cobra.Command, name string) *cobra.Command {
+	for _, c := range root.Commands() {
+		if c.Name() == name || c.HasAlias(name) {
+			return c
+		}
+	}
+	return nil
+}
+
+// printCmdIndex writes one line per top-level command plus the hint how to
+// drill down.
+func printCmdIndex(w io.Writer, root *cobra.Command) {
+	for _, c := range root.Commands() {
+		if c.Hidden || c.Name() == "help" || c.Name() == "completion" || c.Name() == "docs" {
+			continue
+		}
+		name := c.Name()
+		if len(c.Aliases) > 0 {
+			name += " (" + strings.Join(c.Aliases, ", ") + ")"
+		}
+		subs := make([]string, 0, len(c.Commands()))
+		for _, s := range c.Commands() {
+			if !s.Hidden {
+				subs = append(subs, s.Name())
+			}
+		}
+		fmt.Fprintf(w, "- %s — %s", name, c.Short)
+		if len(subs) > 0 {
+			fmt.Fprintf(w, " [%s]", strings.Join(subs, ", "))
+		}
+		fmt.Fprintln(w)
+	}
+	fmt.Fprint(w, `
+Per-command details (subcommands, flags, examples):
+"bexio docs <command>", e.g. "bexio docs kb-invoice" — fetch these on
+demand instead of dumping everything ("bexio docs --full") into context.
+`)
 }
 
 const docsHeader = `# bexio CLI reference
