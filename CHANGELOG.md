@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/lukeisontheroad/bexio-cli/compare/v0.1.0...v0.1.1) (2026-08-21)
+
+
+### Bug Fixes
+
+* **ci:** build the release in the same run that cuts it ([2832a30](https://github.com/lukeisontheroad/bexio-cli/commit/2832a30b54963cc9929ddc296e80a95573061896))
+
 ## 0.1.0 (2026-08-21)
 
 
