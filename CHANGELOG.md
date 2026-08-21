@@ -1,0 +1,15 @@
+# Changelog
+
+## 0.1.0 (2026-08-21)
+
+
+### Features
+
+* bexio CLI with contacts, sales documents, projects, and master data ([313d0bb](https://github.com/lukeisontheroad/bexio-cli/commit/313d0bb5f560fae627bf912c795821894142d8fe))
+* cover purchase, accounting, files, payroll, and banking payments ([45531de](https://github.com/lukeisontheroad/bexio-cli/commit/45531de54434dfcf638f87e3a564e163eb8ff0b0))
+* **docs:** compact default output with per-command drill-down ([9d7f285](https://github.com/lukeisontheroad/bexio-cli/commit/9d7f285316cc12863932ef9aa9f6a0b2c88c5784))
+
+
+### Miscellaneous Chores
+
+* describe the full CLI scope in the Homebrew cask ([8d3eb64](https://github.com/lukeisontheroad/bexio-cli/commit/8d3eb642ca177dded37a767c3e3f4b51e064f727))
