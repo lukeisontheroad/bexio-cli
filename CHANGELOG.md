@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.0](https://github.com/lukeisontheroad/bexio-cli/compare/v0.1.1...v0.2.0) (2026-08-21)
+
+
+### Features
+
+* name commands after bexio's own resource names ([c3fadf2](https://github.com/lukeisontheroad/bexio-cli/commit/c3fadf2bb82add4cfd64c899889d59f25e9fbe9f))
+
 ## [0.1.1](https://github.com/lukeisontheroad/bexio-cli/compare/v0.1.0...v0.1.1) (2026-08-21)
 
 
