@@ -59,7 +59,7 @@ homebrew_casks:
       name: homebrew-tap
       token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
     homepage: https://github.com/lukeisontheroad/bexio-cli
-    description: Work with bexio contacts from the command line
+    description: Work with the bexio business software from the command line
     # Unsigned binary: strip the quarantine attribute so macOS runs it.
     hooks:
       post:
