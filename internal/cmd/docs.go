@@ -94,7 +94,8 @@ const docsHeader = `# bexio CLI reference
 
 Command-line client for the bexio business software: contacts, quotes
 (kb-offer), sales orders (kb-order), invoices (kb-invoice), items & stock,
-deliveries, projects & timesheets, notes & tasks, and master data. All
+deliveries, purchase (bills, expenses, purchase orders), accounting, files,
+projects & timesheets, notes & tasks, payroll, and master data. All
 commands are non-interactive (except a bare "auth login") and print to
 stdout; errors go to stderr with exit code 1, success is exit code 0.
 
@@ -171,6 +172,35 @@ Values for ~ are SQL-like patterns; add % wildcards yourself
   custom, text, subtotal, discount, pagebreak, subposition.
 - Deleting kb documents and projects is permanent (--force where offered);
   contact delete archives (restorable), projects archive/reactivate.
+
+## API generations
+
+The CLI spans three bexio API generations; the differences leak into the
+commands, so expect them:
+
+- 2.0 (contacts, kb documents, notes, tasks, most lookups): integer ids,
+  edit via POST, delete answers {"success": bool}, list takes
+  order_by/limit/offset, search is POST .../search with --where clauses.
+- 3.0 (files, accounting, projects' milestones/packages, purchase orders,
+  currencies, taxes, users): integer ids, update via PUT or PATCH,
+  limit/offset only (no order_by).
+- 4.0 (purchase bills/expenses/outgoing payments, banking payments,
+  payroll): UUID ids, PUT/PATCH updates that REPLACE the whole object,
+  lists wrapped in {"data": [...], "paging": {...}} with limit/page,
+  no /search endpoint (filters are flags), deletes answer 204 with an
+  empty body, and statuses are string enums rather than numeric ids.
+
+## Money and sensitive data
+
+- "banking-payment" instructs REAL bank transfers. Every write requires
+  --force, and its OAuth scope is opt-in: a plain "auth login" does not
+  request it, use --modules banking-payments.
+- "payroll" (employees, absences, paystubs) is likewise opt-in.
+- "outgoing-payment update" needs the banking scope too, so it requires
+  --modules purchase,banking-payments.
+- Read-only logins ("auth login --read-only") request only read scopes.
+  Three bexio scopes have no read-only variant (file, accounting,
+  stock_edit); for those the client-side guard is the only enforcement.
 
 ## Commands
 

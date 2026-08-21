@@ -1,9 +1,10 @@
 # bexio-cli
 
-Go CLI for the bexio REST API (contacts, quotes/orders/invoices,
-items/stock/deliveries, projects/timesheets, notes/tasks, master data).
-Single static binary, cobra command tree, hand-rolled client on
-`net/http`, no SDK.
+Go CLI for the bexio REST API, covering the documented API surface:
+contacts, quotes/orders/invoices, items/stock/deliveries, purchase
+(bills/expenses/purchase orders/outgoing payments), accounting, files,
+projects/timesheets, notes/tasks, payroll, and master data. Single static
+binary, cobra command tree, hand-rolled client on `net/http`, no SDK.
 
 ## Commands
 
@@ -115,6 +116,37 @@ tests drive the real command tree via env vars (`runCmd` in
   it is granted implicitly with any token. Bank accounts need
   `bank_account_show`; currencies and taxes declare no scope. `/3.0/taxes?types=sales_tax&scope=active` lists
   the taxes valid for document positions.
+- The 4.0 API (purchase bills/expenses/outgoing payments, banking payments,
+  payroll) breaks the 2.0 house rules: UUID string ids (`parseID` does not
+  apply), PUT/PATCH updates that replace the whole object (the CLI does
+  read-modify-write to keep partial updates working), lists wrapped in
+  `{"data": [...], "paging": {...}}` with `limit`+`page`, no `/search`
+  endpoint (filters are query params, so `--where` does not apply), deletes
+  answering 204 with an empty body, and string status enums.
+- Asymmetries worth remembering: outgoing payments are updated with PUT on
+  the *collection* (`payment_id` in the body); bill/expense state moves via
+  `PUT .../bookings/{status}`; duplication via `POST .../actions`;
+  `documentnumbers` endpoints validate a number rather than list them;
+  payroll employee update is PATCH but absence update is PUT, both 204.
+- Manual entries (3.0) carry a nested `entries` array (debit/credit lines);
+  update is a full-replace PUT. There is no fetch-one endpoint for manual
+  entries or accounts — the CLI pages the list resp. searches by id.
+- Multipart uploads (files, manual-entry attachments) bypass `Client.Do`
+  (JSON-only) via dedicated helpers that repeat its auth, read-only guard,
+  and error mapping. Manual-entry attachments use one distinct form field
+  per file (`fileName`, `fileName2`, ...); `/3.0/files` uses `file` (the
+  spec also documents the legacy name `upFile`).
+- PDF/document downloads are not uniform: `/2.0/kb_*/pdf` returns base64 in
+  a JSON envelope, while `/3.0/files/*/download` and the payroll
+  `paystub-pdf-download` return raw bytes.
+- Scope model: most resources split `_show`/`_edit`, but `file`,
+  `accounting`, and `stock_edit` exist in one flavour only —
+  `internal/auth/scopes.go` keeps those in read-only logins (documented in
+  `singleFlavourScopes`) and relies on the client-side guard. Modules
+  marked `OptIn` (banking-payments, payroll) are never included in the
+  "all" selection, so a default login cannot mint a token that moves money
+  or reads salary data. `bank_payment_edit` is deliberately kept out of the
+  purchase module for the same reason.
 - Errors: `{"error_code": <int>, "message": "..."}`. 429 = rate limit per
   company per minute (`RateLimit-*` response headers).
 - No official OpenAPI download, but docs.bexio.com is a pre-rendered Redoc

@@ -21,17 +21,31 @@ type Module struct {
 	Name        string
 	Description string
 	Scopes      []string
+	// OptIn keeps a module out of the "all" selection: its scopes are only
+	// requested when the module is named explicitly. Used for scopes that
+	// authorize irreversible real-world effects, so a plain `auth login`
+	// never mints a token capable of them.
+	OptIn bool
 }
 
 var Modules = []Module{
-	{"contacts", "contacts, groups, relations, addresses", []string{"contact_show", "contact_edit"}},
-	{"orders", "sales orders (+ create invoices/deliveries from them)", []string{"kb_order_show", "kb_order_edit", "kb_invoice_edit", "kb_delivery_edit"}},
-	{"quotes", "quotes (+ convert to orders/invoices)", []string{"kb_offer_show", "kb_offer_edit", "kb_order_edit", "kb_invoice_edit"}},
-	{"invoices", "invoices, payments, reminders", []string{"kb_invoice_show", "kb_invoice_edit"}},
-	{"items", "items/products, stock, deliveries", []string{"article_show", "article_edit", "stock_edit", "kb_delivery_show", "kb_delivery_edit"}},
-	{"projects", "projects, milestones, timesheets", []string{"project_show", "project_edit", "monitoring_show", "monitoring_edit"}},
-	{"notes-tasks", "notes and tasks", []string{"note_show", "note_edit", "task_show", "task_edit"}},
-	{"master-data", "users, bank accounts, taxes, currencies", []string{"bank_account_show"}},
+	{Name: "contacts", Description: "contacts, groups, relations, addresses", Scopes: []string{"contact_show", "contact_edit"}},
+	{Name: "orders", Description: "sales orders (+ create invoices/deliveries from them)", Scopes: []string{"kb_order_show", "kb_order_edit", "kb_invoice_edit", "kb_delivery_edit"}},
+	{Name: "quotes", Description: "quotes (+ convert to orders/invoices)", Scopes: []string{"kb_offer_show", "kb_offer_edit", "kb_order_edit", "kb_invoice_edit"}},
+	{Name: "invoices", Description: "invoices, payments, reminders", Scopes: []string{"kb_invoice_show", "kb_invoice_edit"}},
+	{Name: "items", Description: "items/products, stock, deliveries", Scopes: []string{"article_show", "article_edit", "stock_edit", "kb_delivery_show", "kb_delivery_edit"}},
+	{Name: "projects", Description: "projects, milestones, timesheets", Scopes: []string{"project_show", "project_edit", "monitoring_show", "monitoring_edit"}},
+	{Name: "notes-tasks", Description: "notes and tasks", Scopes: []string{"note_show", "note_edit", "task_show", "task_edit"}},
+	{Name: "master-data", Description: "users, bank accounts, taxes, currencies", Scopes: []string{"bank_account_show"}},
+	{Name: "files", Description: "file manager (upload, download, attachments)", Scopes: []string{"file"}},
+	{Name: "accounting", Description: "manual entries, accounts, business/calendar years, VAT, journal", Scopes: []string{"accounting"}},
+	// Deliberately without bank_payment_edit, which only `outgoing-payment
+	// update` needs: that scope also authorizes /4.0/banking/payments, so
+	// granting it here would hand every default login the ability to move
+	// money. Combine with the banking-payments module when you need it.
+	{Name: "purchase", Description: "supplier bills, expenses, purchase orders, outgoing payments", Scopes: []string{"contact_show", "kb_bill_show", "kb_expense_show", "kb_article_order_show", "kb_article_order_edit"}},
+	{Name: "banking-payments", Description: "outgoing bank transfers — MOVES MONEY, opt in explicitly", Scopes: []string{"bank_payment_show", "bank_payment_edit"}, OptIn: true},
+	{Name: "payroll", Description: "employees, absences, paystubs — SENSITIVE, opt in explicitly", Scopes: []string{"payroll_employee_show", "payroll_employee_edit", "payroll_absence_show", "payroll_absence_edit", "payroll_paystub_show"}, OptIn: true},
 }
 
 // AllModuleNames returns the module names in display order.
@@ -43,12 +57,22 @@ func AllModuleNames() []string {
 	return names
 }
 
-// readOnlyScope reports whether a scope is safe for a read-only login:
-// the _show variants, plus stock_edit — the API has no stock_show, and
-// stock_edit alone only unlocks the read-only stock list endpoints (writing
-// stock requires article_edit on top).
+// singleFlavourScopes are scopes bexio does not split into _show/_edit.
+// Dropping them from a read-only login would remove read access entirely
+// (no stock lists, no files, no journal), so they are kept — but the server
+// cannot enforce read-only for them: only the client-side Client.ReadOnly
+// guard refuses writes. Everything else in a read-only login is enforced by
+// bexio itself. stock_edit alone unlocks just the read-only stock lists;
+// writing stock additionally needs article_edit.
+var singleFlavourScopes = map[string]bool{
+	"stock_edit": true,
+	"file":       true,
+	"accounting": true,
+}
+
+// readOnlyScope reports whether a scope belongs in a read-only login.
 func readOnlyScope(s string) bool {
-	return strings.HasSuffix(s, "_show") || s == "stock_edit"
+	return strings.HasSuffix(s, "_show") || singleFlavourScopes[s]
 }
 
 // ScopesFor resolves module selections (names or 1-based list numbers;
@@ -90,7 +114,12 @@ func ScopesFor(selection []string, readOnly bool) (string, error) {
 		seen[s] = true
 	}
 	for _, m := range Modules {
-		if !all && !selected[m.Name] {
+		if m.OptIn {
+			// Opt-in modules are never covered by "all".
+			if !selected[m.Name] {
+				continue
+			}
+		} else if !all && !selected[m.Name] {
 			continue
 		}
 		for _, s := range m.Scopes {

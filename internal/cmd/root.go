@@ -29,8 +29,10 @@ func Execute(version string) error {
 func newRootCmd(version string) *cobra.Command {
 	root := &cobra.Command{
 		Use:   "bexio",
-		Short: "Work with bexio contacts from the command line",
-		Long: `Work with bexio contacts from the command line.
+		Short: "Work with bexio from the command line",
+		Long: `Work with the bexio business software from the command line:
+contacts, quotes, orders, invoices, items and stock, purchase, accounting,
+projects and time tracking, files, payroll, and master data.
 
 Authentication: run "bexio auth login" once (browser-based OAuth, never
 expires), or use a Personal Access Token from

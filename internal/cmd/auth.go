@@ -214,8 +214,13 @@ func slugify(s string) string {
 func promptModules(cmd *cobra.Command) ([]string, error) {
 	out := cmd.OutOrStdout()
 	items := make([]checkboxItem, len(auth.Modules))
+	optIn := 0
 	for i, m := range auth.Modules {
-		items[i] = checkboxItem{Label: m.Name, Description: m.Description, Checked: true}
+		// Opt-in modules (money movement) start unchecked.
+		items[i] = checkboxItem{Label: m.Name, Description: m.Description, Checked: !m.OptIn}
+		if m.OptIn {
+			optIn++
+		}
 	}
 	sel, err := checkboxSelect(out, "Modules to authorize (↑/↓ move, space toggle, a all, enter confirm):", items)
 	if err != nil {
@@ -224,9 +229,18 @@ func promptModules(cmd *cobra.Command) ([]string, error) {
 	if len(sel) == 0 {
 		return nil, fmt.Errorf("no modules selected")
 	}
-	if len(sel) == len(items) {
-		fmt.Fprintln(out, "Authorizing all modules.")
-		return nil, nil
+	if len(sel) == len(items)-optIn {
+		everyDefault := true
+		for _, idx := range sel {
+			if auth.Modules[idx].OptIn {
+				everyDefault = false
+				break
+			}
+		}
+		if everyDefault {
+			fmt.Fprintln(out, "Authorizing all default modules.")
+			return nil, nil
+		}
 	}
 	names := make([]string, len(sel))
 	for i, idx := range sel {

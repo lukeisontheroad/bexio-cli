@@ -1,8 +1,9 @@
 # bexio-cli
 
-Command-line client for the [bexio](https://www.bexio.com) business software:
-contacts, quotes, sales orders, invoices, items & stock, projects &
-timesheets, notes & tasks, and master data. Single static Go binary, no
+Command-line client for the [bexio](https://www.bexio.com) business software,
+covering the documented API surface: contacts, quotes, sales orders,
+invoices, items & stock, purchase, accounting, files, projects & timesheets,
+notes & tasks, payroll, and master data. Single static Go binary, no
 dependencies on an SDK — the API client follows
 [docs.bexio.com](https://docs.bexio.com) directly.
 
@@ -51,7 +52,15 @@ Scripting: `BEXIO_TOKEN=<token>` overrides everything.
 (`_show`) scopes — the server itself rejects writes — and additionally marks
 the instance read-only so the CLI refuses every modifying request (searches
 still work). For a single invocation use the global `--read-only` flag or
-`BEXIO_READ_ONLY=1`. Handy for AI agents that only need lookups.
+`BEXIO_READ_ONLY=1`. Handy for AI agents that only need lookups. Three bexio
+scopes (`file`, `accounting`, `stock_edit`) have no read-only counterpart, so
+for those the client-side guard is the only line of defence.
+
+**Scope selection.** The login shows a checklist of modules and requests only
+the scopes those modules need. Modules that authorize money movement
+(`banking-payments`) or personal data (`payroll`) are **opt-in**: they are
+never part of "all" and must be named explicitly, e.g.
+`bexio auth login --modules contacts,invoices,banking-payments`.
 
 ### Multiple bexio companies
 
@@ -80,6 +89,13 @@ bexio --instance freelance-gmbh contact list
 | `bexio pr-project …` (`project`) | projects incl. `milestone`/`package`, archive/reactivate |
 | `bexio timesheet …` / `bexio client-service …` | time tracking + business activities |
 | `bexio note …` / `bexio task …` / `bexio comment …` | notes, tasks, comments on kb documents |
+| `bexio purchase-bill …` (`bill`) / `bexio expense …` | supplier bills and expenses: CRUD, booking transitions, duplicate |
+| `bexio purchase-order …` / `bexio outgoing-payment …` | purchase orders, payments on bills |
+| `bexio manual-entry …` | manual bookings with debit/credit lines + receipt attachments |
+| `bexio account / account-group / business-year / calendar-year / vat-period / journal …` | accounting reference data and the journal report |
+| `bexio file …` | upload, download, preview, search files |
+| `bexio payroll-employee …` (`employee`) | employees, absences, paystub download (opt-in scope) |
+| `bexio banking-payment …` | outgoing bank transfers — **moves real money**, opt-in scope, `--force` on every write |
 | `bexio country/language/salutation/title/unit/payment-type …` | 2.0 lookups |
 | `bexio currency/tax/bank-account/user/company-profile/permission …` | 3.0 master data |
 | `bexio api METHOD /2.0/…` | raw authenticated request to any endpoint |

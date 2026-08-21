@@ -60,3 +60,32 @@ func TestScopesForReadOnly(t *testing.T) {
 		}
 	}
 }
+
+func TestOptInModulesExcludedFromAll(t *testing.T) {
+	s, err := ScopesFor(nil, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, m := range Modules {
+		if !m.OptIn {
+			continue
+		}
+		for _, scope := range m.Scopes {
+			if strings.Contains(" "+s+" ", " "+scope+" ") {
+				t.Fatalf("opt-in module %q leaked scope %q into the all selection: %s", m.Name, scope, s)
+			}
+		}
+	}
+
+	// Naming it explicitly grants it.
+	s, err = ScopesFor([]string{"banking-payments"}, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(s, "bank_payment_edit") {
+		t.Fatalf("explicit opt-in did not grant the scope: %s", s)
+	}
+	if strings.Contains(s, "contact_edit") {
+		t.Fatalf("explicit selection pulled in unrelated modules: %s", s)
+	}
+}
