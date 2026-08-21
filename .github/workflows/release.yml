@@ -1,13 +1,25 @@
 name: release
 
-# NOTE: tags pushed by release-please's default GITHUB_TOKEN do not trigger
-# this workflow (GitHub anti-recursion rule). Either dispatch it manually on
-# the tag ref, or give release-please a PAT (RELEASE_PLEASE_TOKEN) so its tag
-# pushes fire events.
+# Normally invoked by the release-please workflow (workflow_call) right after
+# it cuts a release, because tags pushed with the default GITHUB_TOKEN do not
+# themselves trigger workflows (GitHub anti-recursion rule). The tag trigger
+# below therefore only fires for tags pushed by a human, and
+# workflow_dispatch stays as a manual re-run escape hatch.
 on:
   push:
     tags: ["v*"]
   workflow_dispatch:
+    inputs:
+      ref:
+        description: "Tag to build (defaults to the checked-out ref)"
+        required: false
+        type: string
+  workflow_call:
+    inputs:
+      ref:
+        description: "Tag the release was cut at"
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -18,6 +30,9 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
+          # For workflow_call/dispatch the caller passes the tag; a direct
+          # tag push already checks out the right ref.
+          ref: ${{ inputs.ref || github.ref }}
           fetch-depth: 0
       - uses: actions/setup-go@v7
         with:
