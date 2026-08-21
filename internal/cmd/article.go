@@ -571,11 +571,11 @@ func newStockAreaSearchCmd() *cobra.Command {
 // "kb_delivery").
 func newDeliveryCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "kb-delivery",
-		Aliases: []string{"delivery"},
+		Use:     "delivery",
+		Aliases: []string{"kb-delivery"},
 		Short:   "List, view, and issue deliveries",
 		Long: `List, view, and issue deliveries (delivery notes). The API cannot create
-deliveries directly: create them from an order with "bexio kb-order
+deliveries directly: create them from an order with "bexio order
 delivery <order-id>", then issue them here to book the stock movements.
 
 Status ids: 10 draft, 18 done, 20 canceled.`,
@@ -628,8 +628,8 @@ func newDeliveryListCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "List deliveries",
-		Example: `  bexio kb-delivery list
-  bexio kb-delivery list --order-by updated_at_desc -o json`,
+		Example: `  bexio delivery list
+  bexio delivery list --order-by updated_at_desc -o json`,
 		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateOutput(); err != nil {

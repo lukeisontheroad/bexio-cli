@@ -26,7 +26,7 @@ available names. A single configured company is used automatically.
 Run `bexio docs` once — a compact page (setup, conventions, search syntax,
 document workflows, command index) designed to stay in context. For the
 subcommands, flags, and examples of one resource, fetch on demand:
-`bexio docs <command>` (e.g. `bexio docs kb-invoice`). Avoid
+`bexio docs <command>` (e.g. `bexio docs invoice`). Avoid
 `bexio docs --full` — it prints ~3000 lines.
 
 ## Rules

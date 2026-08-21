@@ -18,8 +18,8 @@ func init() { registerModule(newOrderCmd) }
 // newOrderCmd manages sales orders (API resource "kb_order").
 func newOrderCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "kb-order",
-		Aliases: []string{"order"},
+		Use:     "order",
+		Aliases: []string{"kb-order"},
 		Short:   "List, view, search, and modify sales orders",
 	}
 	cmd.AddCommand(
@@ -198,8 +198,8 @@ func newOrderListCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "List sales orders",
-		Example: `  bexio kb-order list
-  bexio kb-order list --order-by updated_at_desc --limit 20 -o json`,
+		Example: `  bexio order list
+  bexio order list --order-by updated_at_desc --limit 20 -o json`,
 		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateOutput(); err != nil {
@@ -259,9 +259,9 @@ clauses use the raw API field names and add AND conditions (see
 Searchable fields: id, kb_item_status_id, document_nr, title, contact_id,
 contact_sub_id, user_id, currency_id, total_gross, total_net, updated_at.
 Status ids: 5 pending, 6 done, 15 partial, 21 canceled.`,
-		Example: `  bexio kb-order search --where contact_id=17
-  bexio kb-order search --where kb_item_status_id=5
-  bexio kb-order search --where "updated_at>2026-01-01" -o json`,
+		Example: `  bexio order search --where contact_id=17
+  bexio order search --where kb_item_status_id=5
+  bexio order search --where "updated_at>2026-01-01" -o json`,
 		Args: cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateOutput(); err != nil {
@@ -310,10 +310,10 @@ authenticated user. Positions are passed as repeatable --position specs
   type=custom   text, amount, unit_price, and optionally unit_id, tax_id
   type=text     text
   type=subtotal / discount / pagebreak`,
-		Example: `  bexio kb-order create --contact-id 17 --title "Website relaunch" \
+		Example: `  bexio order create --contact-id 17 --title "Website relaunch" \
       --position "type=custom,text=Consulting,amount=8,unit_price=150" \
       --position "type=article,article_id=5,amount=2"
-  bexio kb-order create --contact-id 17 --positions-json '[{"type":"KbPositionText","text":"Hi"}]'`,
+  bexio order create --contact-id 17 --positions-json '[{"type":"KbPositionText","text":"Hi"}]'`,
 		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateOutput(); err != nil {
@@ -380,7 +380,7 @@ func newOrderUpdateCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update <id>",
 		Short: "Update header fields of a sales order",
-		Long:  "Update a sales order. Only the flags you pass are changed. Positions are managed with `bexio kb-order position`.",
+		Long:  "Update a sales order. Only the flags you pass are changed. Positions are managed with `bexio order position`.",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateOutput(); err != nil {
@@ -449,8 +449,8 @@ func newOrderPDFCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "pdf <id>",
 		Short: "Download the order as PDF",
-		Example: `  bexio kb-order pdf 4
-  bexio kb-order pdf 4 --out offer.pdf --logopaper 1`,
+		Example: `  bexio order pdf 4
+  bexio order pdf 4 --out offer.pdf --logopaper 1`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			id, err := parseID("order", args[0])
@@ -586,7 +586,7 @@ func newOrderRepetitionCmd() *cobra.Command {
 	edit := &cobra.Command{
 		Use:   "edit <order-id>",
 		Short: "Edit the repetition (raw JSON body)",
-		Example: `  bexio kb-order repetition edit 4 --json \
+		Example: `  bexio order repetition edit 4 --json \
       '{"start":"2026-09-01","end":null,"repetition":{"type":"monthly","interval":1}}'`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -643,14 +643,14 @@ func newOrderPositionCmd() *cobra.Command {
 		Short: "Add, update, or delete positions of a sales order",
 		Long: `Manage the positions of an existing sales order. Position specs use the
 same "type=...,field=value,..." syntax as "kb-order create --position";
-"bexio kb-order view <id>" shows the current positions with their ids.`,
+"bexio order view <id>" shows the current positions with their ids.`,
 	}
 	add := &cobra.Command{
 		Use:   "add <order-id> <spec>",
 		Short: "Add a position",
-		Example: `  bexio kb-order position add 4 "type=article,article_id=5,amount=2"
-  bexio kb-order position add 4 "type=custom,text=Consulting,amount=8,unit_price=150"
-  bexio kb-order position add 4 "type=text,text=Delivery in calendar week 40"`,
+		Example: `  bexio order position add 4 "type=article,article_id=5,amount=2"
+  bexio order position add 4 "type=custom,text=Consulting,amount=8,unit_price=150"
+  bexio order position add 4 "type=text,text=Delivery in calendar week 40"`,
 		Args: cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateOutput(); err != nil {

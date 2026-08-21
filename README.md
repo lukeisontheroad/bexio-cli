@@ -77,41 +77,105 @@ bexio --instance freelance-gmbh contact list
 
 ## Commands
 
+Run `bexio docs` for the full reference. Commands are named after bexio's own
+resource names; the API's internal prefixes (`kb_offer`, `pr_project`, …) work
+as aliases.
+
+**Contacts**
+
 | Command | Description |
 | --- | --- |
-| `bexio contact …` | contacts (delete archives, `restore` brings back), `contact address …` for additional addresses |
-| `bexio contact-group / contact-relation / contact-sector …` | contact master data |
-| `bexio kb-offer …` (`quote`) | quotes: CRUD, pdf, issue/accept/reject/send/copy, convert via `order`/`invoice` |
-| `bexio kb-order …` (`order`) | sales orders: CRUD, pdf, positions, repetition, convert via `invoice`/`delivery` |
-| `bexio kb-invoice …` (`invoice`) | invoices: CRUD, pdf, lifecycle, `payment …`, `reminder …` |
-| `bexio kb-delivery …` (`delivery`) | deliveries: list/view/issue (issue books stock) |
-| `bexio article …` (`item`) | items/products, plus `stock` / `stock-area` lookups |
-| `bexio pr-project …` (`project`) | projects incl. `milestone`/`package`, archive/reactivate |
-| `bexio timesheet …` / `bexio client-service …` | time tracking + business activities |
-| `bexio note …` / `bexio task …` / `bexio comment …` | notes, tasks, comments on kb documents |
-| `bexio purchase-bill …` (`bill`) / `bexio expense …` | supplier bills and expenses: CRUD, booking transitions, duplicate |
-| `bexio purchase-order …` / `bexio outgoing-payment …` | purchase orders, payments on bills |
-| `bexio manual-entry …` | manual bookings with debit/credit lines + receipt attachments |
-| `bexio account / account-group / business-year / calendar-year / vat-period / journal …` | accounting reference data and the journal report |
-| `bexio file …` | upload, download, preview, search files |
-| `bexio payroll-employee …` (`employee`) | employees, absences, paystub download (opt-in scope) |
-| `bexio banking-payment …` | outgoing bank transfers — **moves real money**, opt-in scope, `--force` on every write |
-| `bexio country/language/salutation/title/unit/payment-type …` | 2.0 lookups |
-| `bexio currency/tax/bank-account/user/company-profile/permission …` | 3.0 master data |
-| `bexio api METHOD /2.0/…` | raw authenticated request to any endpoint |
-| `bexio auth login/status/logout` | authentication (OAuth module checklist or PAT) |
-| `bexio docs [command]` | compact LLM reference; per-command details on demand (`--full` for everything) |
+| `contact` | list, view, search, create, update; `delete` archives and `restore` brings it back |
+| `contact address` | additional addresses of a contact |
+| `contact-group` | contact groups |
+| `contact-relation` | company ↔ person links |
+| `contact-sector` | contact sectors (read-only) |
+| `contact-bulk-create` | create many contacts from a JSON file |
+
+**Sales documents**
+
+| Command | Description |
+| --- | --- |
+| `quote` | quotes: CRUD, pdf, issue/accept/reject/send/copy, convert to order or invoice |
+| `order` | sales orders: CRUD, pdf, positions, repetition, convert to invoice or delivery |
+| `invoice` | invoices: CRUD, pdf, lifecycle, plus `payment` and `reminder` subcommands |
+| `delivery` | delivery notes: list, view, issue (issuing books the stock movements) |
+
+**Purchase**
+
+| Command | Description |
+| --- | --- |
+| `bill` | supplier bills: CRUD, booking transitions, duplicate |
+| `expense` | expenses, same shape as bills |
+| `purchase-order` | purchase orders sent to suppliers |
+| `outgoing-payment` | payments recorded against a bill |
+
+**Accounting**
+
+| Command | Description |
+| --- | --- |
+| `manual-entry` | manual bookings with debit/credit lines and receipt attachments |
+| `journal` | the accounting journal report |
+| `account` | ledger accounts |
+| `account-group` | account groups |
+| `business-year` | business years |
+| `calendar-year` | calendar years |
+| `vat-period` | VAT periods |
+
+**Items, projects, and work**
+
+| Command | Description |
+| --- | --- |
+| `article` | items and products (alias `item`) |
+| `stock` | stock locations (read-only) |
+| `stock-area` | stock areas (read-only) |
+| `project` | projects, incl. `milestone` and `package`, archive/reactivate |
+| `timesheet` | time tracking |
+| `client-service` | business activities referenced by timesheets |
+| `note` | notes |
+| `task` | tasks |
+| `comment` | comments on quotes, orders, and invoices |
+
+**Files, payroll, banking**
+
+| Command | Description |
+| --- | --- |
+| `file` | upload, download, preview, search files |
+| `payroll-employee` | employees, absences, paystub download (opt-in scope) |
+| `banking-payment` | outgoing bank transfers — **moves real money**, opt-in scope, `--force` on every write |
+
+**Master data**
+
+| Command | Description |
+| --- | --- |
+| `country`, `language`, `salutation`, `title`, `unit` | 2.0 lookups referenced by contacts and documents |
+| `payment-type`, `communication-kind` | payment and communication types |
+| `currency`, `tax`, `bank-account` | 3.0 financial master data |
+| `user`, `company-profile`, `permission` | the authenticated account and its access |
+| `document-setting`, `document-template` | document defaults and templates |
+
+**Tooling**
+
+| Command | Description |
+| --- | --- |
+| `auth login`, `auth status`, `auth logout` | authentication (OAuth module checklist or PAT) |
+| `api METHOD /2.0/…` | raw authenticated request to any endpoint |
+| `docs [command]` | compact LLM reference; per-command details on demand (`--full` for everything) |
 
 Quote/order/invoice positions use compact specs:
 
 ```sh
-bexio kb-order create --contact-id 17 --title "Relaunch" \
+bexio order create --contact-id 17 --title "Relaunch" \
     --position "type=custom,text=Consulting,amount=8,unit_price=150" \
     --position "type=article,article_id=5,amount=2"
 ```
 
-The CLI mirrors the bexio API scheme: resource names and field flags map 1:1
-to the API (`--name-1` → `name_1`, `contact-group` → `contact_group`, …).
+Field flags map 1:1 to the API fields (`--name-1` → `name_1`,
+`--contact-group-ids` → `contact_group_ids`, …), so payloads stay predictable
+against [docs.bexio.com](https://docs.bexio.com). Command names use bexio's
+documentation names rather than the internal resource paths, with the latter
+kept as aliases: `quote` = `kb-offer`, `order` = `kb-order`,
+`invoice` = `kb-invoice`, `delivery` = `kb-delivery`, `project` = `pr-project`.
 Every read command supports `-o json` to print the raw API objects.
 
 Search uses the API's criteria syntax via repeatable `--where` clauses:

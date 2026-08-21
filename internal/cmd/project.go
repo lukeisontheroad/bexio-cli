@@ -22,8 +22,8 @@ func init() {
 
 func newProjectCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "pr-project",
-		Aliases: []string{"project"},
+		Use:     "project",
+		Aliases: []string{"pr-project"},
 		Short:   "List, view, search, and modify projects",
 	}
 	cmd.AddCommand(
@@ -79,9 +79,9 @@ func newProjectListCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "List projects",
-		Example: `  bexio pr-project list
-  bexio pr-project list --archived
-  bexio pr-project list -o json`,
+		Example: `  bexio project list
+  bexio project list --archived
+  bexio project list -o json`,
 		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateOutput(); err != nil {
@@ -139,9 +139,9 @@ func newProjectSearchCmd() *cobra.Command {
 the raw API field names and add AND conditions (see "bexio contact search
 --help" for operators). Searchable fields include: name, contact_id,
 pr_state_id.`,
-		Example: `  bexio pr-project search Website
-  bexio pr-project search --where contact_id=17
-  bexio pr-project search --where pr_state_id=1 -o json`,
+		Example: `  bexio project search Website
+  bexio project search --where contact_id=17
+  bexio project search --where pr_state_id=1 -o json`,
 		Args: cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateOutput(); err != nil {
@@ -196,8 +196,8 @@ func (f *projectFieldFlags) register(cmd *cobra.Command) {
 	fl.StringVar(&f.startDate, "start-date", "", "start date (YYYY-MM-DD)")
 	fl.StringVar(&f.endDate, "end-date", "", "end date (YYYY-MM-DD)")
 	fl.StringVar(&f.comment, "comment", "", "comment")
-	fl.IntVar(&f.prStateID, "pr-state-id", 0, "project state id (list with: bexio pr-project state list)")
-	fl.IntVar(&f.prProjectTypeID, "pr-project-type-id", 0, "project type id (list with: bexio pr-project type list)")
+	fl.IntVar(&f.prStateID, "pr-state-id", 0, "project state id (list with: bexio project state list)")
+	fl.IntVar(&f.prProjectTypeID, "pr-project-type-id", 0, "project type id (list with: bexio project type list)")
 	fl.IntVar(&f.contactID, "contact-id", 0, "contact id")
 	fl.IntVar(&f.contactSubID, "contact-sub-id", 0, "sub contact id")
 	fl.IntVar(&f.prInvoiceTypeID, "pr-invoice-type-id", 0, "invoice type id (1 hourly/service, 2 hourly/employee, 3 hourly/project, 4 fix)")
@@ -234,7 +234,7 @@ func newProjectCreateCmd() *cobra.Command {
 		Long: `Create a project. --name, --contact-id, --pr-state-id, and
 --pr-project-type-id are required. user_id is required by the API and
 defaults to the authenticated user.`,
-		Example: `  bexio pr-project create --name "Website Relaunch" --contact-id 17 \
+		Example: `  bexio project create --name "Website Relaunch" --contact-id 17 \
       --pr-state-id 1 --pr-project-type-id 1`,
 		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -282,7 +282,7 @@ func newProjectUpdateCmd() *cobra.Command {
 		Use:     "update <id>",
 		Short:   "Update fields of a project",
 		Long:    "Update a project. Only the flags you pass are changed.",
-		Example: `  bexio pr-project update 3 --pr-state-id 3 --end-date 2026-12-31`,
+		Example: `  bexio project update 3 --pr-state-id 3 --end-date 2026-12-31`,
 		Args:    cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateOutput(); err != nil {
@@ -319,7 +319,7 @@ func newProjectDeleteCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "delete <id>",
 		Short: "Delete a project permanently",
-		Long:  "Delete a project permanently. Use `bexio pr-project archive` to keep it recoverable.",
+		Long:  "Delete a project permanently. Use `bexio project archive` to keep it recoverable.",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			id, err := parseID("project", args[0])
@@ -356,7 +356,7 @@ func newProjectArchiveCmd() *cobra.Command {
 			if err := client.ArchiveProject(cmd.Context(), id); err != nil {
 				return err
 			}
-			fmt.Fprintf(cmd.OutOrStdout(), "Archived project %d (undo with `bexio pr-project reactivate %d`)\n", id, id)
+			fmt.Fprintf(cmd.OutOrStdout(), "Archived project %d (undo with `bexio project reactivate %d`)\n", id, id)
 			return nil
 		},
 	}
@@ -528,7 +528,7 @@ func newMilestoneListCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "list <project-id>",
 		Short:   "List the milestones of a project",
-		Example: `  bexio pr-project milestone list 3`,
+		Example: `  bexio project milestone list 3`,
 		Args:    cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateOutput(); err != nil {
@@ -588,7 +588,7 @@ func newMilestoneCreateCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "create <project-id>",
 		Short:   "Create a milestone",
-		Example: `  bexio pr-project milestone create 3 --name "Go live" --end-date 2026-12-01`,
+		Example: `  bexio project milestone create 3 --name "Go live" --end-date 2026-12-01`,
 		Args:    cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateOutput(); err != nil {
@@ -765,7 +765,7 @@ func newProjectPackageListCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "list <project-id>",
 		Short:   "List the work packages of a project",
-		Example: `  bexio pr-project package list 3`,
+		Example: `  bexio project package list 3`,
 		Args:    cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateOutput(); err != nil {
@@ -825,7 +825,7 @@ func newProjectPackageCreateCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "create <project-id>",
 		Short:   "Create a work package",
-		Example: `  bexio pr-project package create 3 --name Documentation --estimated-time-in-hours 8`,
+		Example: `  bexio project package create 3 --name Documentation --estimated-time-in-hours 8`,
 		Args:    cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateOutput(); err != nil {

@@ -22,7 +22,7 @@ func newDocsCmd() *cobra.Command {
 
 Without arguments: setup, conventions, search syntax, document workflows,
 and a one-line index of every command — compact enough to keep in context.
-With a command name ("bexio docs kb-invoice"): all subcommands, flags, and
+With a command name ("bexio docs invoice"): all subcommands, flags, and
 examples of that command only. --full prints everything at once.`,
 		Args: cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -85,17 +85,17 @@ func printCmdIndex(w io.Writer, root *cobra.Command) {
 	}
 	fmt.Fprint(w, `
 Per-command details (subcommands, flags, examples):
-"bexio docs <command>", e.g. "bexio docs kb-invoice" — fetch these on
+"bexio docs <command>", e.g. "bexio docs invoice" — fetch these on
 demand instead of dumping everything ("bexio docs --full") into context.
 `)
 }
 
 const docsHeader = `# bexio CLI reference
 
-Command-line client for the bexio business software: contacts, quotes
-(kb-offer), sales orders (kb-order), invoices (kb-invoice), items & stock,
-deliveries, purchase (bills, expenses, purchase orders), accounting, files,
-projects & timesheets, notes & tasks, payroll, and master data. All
+Command-line client for the bexio business software: contacts, quotes,
+sales orders, invoices, items & stock, deliveries, purchase (bills,
+expenses, purchase orders), accounting, files, projects & timesheets,
+notes & tasks, payroll, and master data. All
 commands are non-interactive (except a bare "auth login") and print to
 stdout; errors go to stderr with exit code 1, success is exit code 0.
 
@@ -128,10 +128,12 @@ There is no sticky default instance.
 
 ## Conventions
 
-- The CLI mirrors the bexio API scheme (https://docs.bexio.com): resources
-  keep their API names (contact, contact-group, contact-relation,
-  contact-sector) and field flags map 1:1 to API fields
-  (--name-1 -> name_1, --contact-group-ids -> contact_group_ids, ...).
+- Commands are named after bexio's documentation names; the internal API
+  resource paths work as aliases (quote = kb-offer, order = kb-order,
+  invoice = kb-invoice, delivery = kb-delivery, project = pr-project).
+  Field flags map 1:1 to API fields (--name-1 -> name_1,
+  --contact-group-ids -> contact_group_ids, ...), so payloads stay
+  predictable against https://docs.bexio.com.
 - Every read command supports "-o json", printing the raw bexio API objects
   (exact API field names, machine-parseable). Prefer it when consuming
   output programmatically; the default table view truncates long values.
@@ -154,16 +156,16 @@ Values for ~ are SQL-like patterns; add % wildcards yourself
 
 ## Document workflows (kb resources)
 
-- kb-offer (quote) statuses: 1 draft, 2 pending, 3 confirmed, 4 declined.
+- quote (kb-offer) statuses: 1 draft, 2 pending, 3 confirmed, 4 declined.
   Lifecycle: issue -> accept|reject (revert-issue, reissue, mark-as-sent);
-  convert with "kb-offer order" / "kb-offer invoice".
-- kb-order statuses: 5 pending, 6 done, 15 partial, 21 canceled. Convert
-  with "kb-order invoice" / "kb-order delivery".
-- kb-invoice statuses: 7 draft, 8 pending, 9 paid, 16 partial, 19 canceled,
+  convert with "quote order" / "quote invoice".
+- order (kb-order) statuses: 5 pending, 6 done, 15 partial, 21 canceled. Convert
+  with "order invoice" / "order delivery".
+- invoice (kb-invoice) statuses: 7 draft, 8 pending, 9 paid, 16 partial, 19 canceled,
   31 unpaid — read-only, driven by issue/revert-issue/cancel and payments.
-  Nested: "kb-invoice payment ..." and "kb-invoice reminder ...".
-- kb-delivery statuses: 10 draft, 18 done, 20 canceled. Deliveries are
-  created from orders; "kb-delivery issue" books the stock movements.
+  Nested: "invoice payment ..." and "invoice reminder ...".
+- delivery (kb-delivery) statuses: 10 draft, 18 done, 20 canceled. Deliveries are
+  created from orders; "delivery issue" books the stock movements.
 - "send" commands need --recipient-email/--subject/--message, and the
   message must contain the literal "[Network Link]" placeholder.
 - Positions on quotes/orders/invoices: repeatable

@@ -18,8 +18,8 @@ func init() { registerModule(newQuoteCmd) }
 // newQuoteCmd manages quotes/offers (API resource "kb_offer").
 func newQuoteCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "kb-offer",
-		Aliases: []string{"quote", "offer"},
+		Use:     "quote",
+		Aliases: []string{"kb-offer", "offer"},
 		Short:   "List, view, search, and modify quotes (offers)",
 	}
 	cmd.AddCommand(
@@ -158,8 +158,8 @@ func newQuoteListCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "List quotes",
-		Example: `  bexio kb-offer list
-  bexio kb-offer list --order-by updated_at_desc --limit 20 -o json`,
+		Example: `  bexio quote list
+  bexio quote list --order-by updated_at_desc --limit 20 -o json`,
 		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateOutput(); err != nil {
@@ -220,9 +220,9 @@ Searchable fields: id, kb_item_status_id, document_nr, title, contact_id,
 contact_sub_id, user_id, currency_id, total_gross, total_net, total,
 is_valid_from, is_valid_to, is_valid_until, updated_at.
 Status ids: 1 draft, 2 pending, 3 confirmed, 4 declined.`,
-		Example: `  bexio kb-offer search --where contact_id=17
-  bexio kb-offer search --where kb_item_status_id=2
-  bexio kb-offer search --where "updated_at>2026-01-01" -o json`,
+		Example: `  bexio quote search --where contact_id=17
+  bexio quote search --where kb_item_status_id=2
+  bexio quote search --where "updated_at>2026-01-01" -o json`,
 		Args: cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateOutput(); err != nil {
@@ -271,10 +271,10 @@ authenticated user. Positions are passed as repeatable --position specs
   type=custom   text, amount, unit_price, and optionally unit_id, tax_id
   type=text     text
   type=subtotal / discount / pagebreak`,
-		Example: `  bexio kb-offer create --contact-id 17 --title "Website relaunch" \
+		Example: `  bexio quote create --contact-id 17 --title "Website relaunch" \
       --position "type=custom,text=Consulting,amount=8,unit_price=150" \
       --position "type=article,article_id=5,amount=2"
-  bexio kb-offer create --contact-id 17 --positions-json '[{"type":"KbPositionText","text":"Hi"}]'`,
+  bexio quote create --contact-id 17 --positions-json '[{"type":"KbPositionText","text":"Hi"}]'`,
 		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateOutput(); err != nil {
@@ -341,7 +341,7 @@ func newQuoteUpdateCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update <id>",
 		Short: "Update header fields of a quote",
-		Long:  "Update a quote. Only the flags you pass are changed. Positions are managed with `bexio kb-offer position`.",
+		Long:  "Update a quote. Only the flags you pass are changed. Positions are managed with `bexio quote position`.",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateOutput(); err != nil {
@@ -410,8 +410,8 @@ func newQuotePDFCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "pdf <id>",
 		Short: "Download the quote as PDF",
-		Example: `  bexio kb-offer pdf 4
-  bexio kb-offer pdf 4 --out quote.pdf --logopaper 1`,
+		Example: `  bexio quote pdf 4
+  bexio quote pdf 4 --out quote.pdf --logopaper 1`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			id, err := parseID("quote", args[0])
@@ -482,7 +482,7 @@ func newQuoteSendCmd() *cobra.Command {
 		Short: "Send the quote by email",
 		Long: `Send the quote by email. --recipient-email, --subject, and --message are
 required; the message must contain the "[Network Link]" placeholder.`,
-		Example: `  bexio kb-offer send 4 --recipient-email anna@example.com \
+		Example: `  bexio quote send 4 --recipient-email anna@example.com \
       --subject "Your quote" --message "Please find the quote at [Network Link]" \
       --attach-pdf`,
 		Args: cobra.ExactArgs(1),
@@ -526,8 +526,8 @@ func newQuoteCopyCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "copy <id>",
 		Short: "Copy the quote to a new quote",
-		Example: `  bexio kb-offer copy 4 --contact-id 17
-  bexio kb-offer copy 4 --contact-id 17 --title "Second round" --is-valid-from 2026-09-01`,
+		Example: `  bexio quote copy 4 --contact-id 17
+  bexio quote copy 4 --contact-id 17 --title "Second round" --is-valid-from 2026-09-01`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateOutput(); err != nil {
@@ -624,14 +624,14 @@ func newQuotePositionCmd() *cobra.Command {
 		Short: "Add, update, or delete positions of a quote",
 		Long: `Manage the positions of an existing quote. Position specs use the same
 "type=...,field=value,..." syntax as "kb-offer create --position";
-"bexio kb-offer view <id>" shows the current positions with their ids.`,
+"bexio quote view <id>" shows the current positions with their ids.`,
 	}
 	add := &cobra.Command{
 		Use:   "add <quote-id> <spec>",
 		Short: "Add a position",
-		Example: `  bexio kb-offer position add 4 "type=article,article_id=5,amount=2"
-  bexio kb-offer position add 4 "type=custom,text=Consulting,amount=8,unit_price=150"
-  bexio kb-offer position add 4 "type=text,text=Valid for 30 days"`,
+		Example: `  bexio quote position add 4 "type=article,article_id=5,amount=2"
+  bexio quote position add 4 "type=custom,text=Consulting,amount=8,unit_price=150"
+  bexio quote position add 4 "type=text,text=Valid for 30 days"`,
 		Args: cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateOutput(); err != nil {

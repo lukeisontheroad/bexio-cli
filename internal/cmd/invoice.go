@@ -17,8 +17,8 @@ func init() { registerModule(newInvoiceCmd) }
 // newInvoiceCmd manages customer invoices (API resource "kb_invoice").
 func newInvoiceCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "kb-invoice",
-		Aliases: []string{"invoice"},
+		Use:     "invoice",
+		Aliases: []string{"kb-invoice"},
 		Short:   "List, view, search, and modify customer invoices",
 	}
 	cmd.AddCommand(
@@ -182,8 +182,8 @@ func newInvoiceListCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "List invoices",
-		Example: `  bexio kb-invoice list
-  bexio kb-invoice list --order-by updated_at_desc --limit 20 -o json`,
+		Example: `  bexio invoice list
+  bexio invoice list --order-by updated_at_desc --limit 20 -o json`,
 		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateOutput(); err != nil {
@@ -244,9 +244,9 @@ Searchable fields: id, kb_item_status_id, document_nr, title,
 api_reference, contact_id, contact_sub_id, user_id, currency_id,
 total_gross, total_net, total, is_valid_from, is_valid_to, updated_at.
 Status ids: 7 draft, 8 pending, 9 paid, 16 partial, 19 canceled, 31 unpaid.`,
-		Example: `  bexio kb-invoice search --where contact_id=17
-  bexio kb-invoice search --where kb_item_status_id=8
-  bexio kb-invoice search --where "is_valid_to<2026-01-01" -o json`,
+		Example: `  bexio invoice search --where contact_id=17
+  bexio invoice search --where kb_item_status_id=8
+  bexio invoice search --where "is_valid_to<2026-01-01" -o json`,
 		Args: cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateOutput(); err != nil {
@@ -288,7 +288,7 @@ func newInvoiceCreateCmd() *cobra.Command {
 		Use:   "create",
 		Short: "Create an invoice (as draft)",
 		Long: `Create an invoice. --contact-id is required; user_id defaults to the
-authenticated user. The invoice starts as a draft — use "bexio kb-invoice
+authenticated user. The invoice starts as a draft — use "bexio invoice
 issue" to make it pending. Positions are passed as repeatable --position
 specs ("type=..." plus raw API fields) or as raw JSON via --positions-json:
 
@@ -296,10 +296,10 @@ specs ("type=..." plus raw API fields) or as raw JSON via --positions-json:
   type=custom   text, amount, unit_price, and optionally unit_id, tax_id
   type=text     text
   type=subtotal / discount / pagebreak`,
-		Example: `  bexio kb-invoice create --contact-id 17 --title "Website relaunch" \
+		Example: `  bexio invoice create --contact-id 17 --title "Website relaunch" \
       --position "type=custom,text=Consulting,amount=8,unit_price=150" \
       --position "type=article,article_id=5,amount=2"
-  bexio kb-invoice create --contact-id 17 --positions-json '[{"type":"KbPositionText","text":"Hi"}]'`,
+  bexio invoice create --contact-id 17 --positions-json '[{"type":"KbPositionText","text":"Hi"}]'`,
 		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateOutput(); err != nil {
@@ -366,7 +366,7 @@ func newInvoiceUpdateCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update <id>",
 		Short: "Update header fields of an invoice",
-		Long:  "Update an invoice. Only the flags you pass are changed. Positions are managed with `bexio kb-invoice position`.",
+		Long:  "Update an invoice. Only the flags you pass are changed. Positions are managed with `bexio invoice position`.",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateOutput(); err != nil {
@@ -435,8 +435,8 @@ func newInvoicePDFCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "pdf <id>",
 		Short: "Download the invoice as PDF",
-		Example: `  bexio kb-invoice pdf 4
-  bexio kb-invoice pdf 4 --out invoice.pdf --logopaper 1`,
+		Example: `  bexio invoice pdf 4
+  bexio invoice pdf 4 --out invoice.pdf --logopaper 1`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			id, err := parseID("invoice", args[0])
@@ -465,8 +465,8 @@ func newInvoiceCopyCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "copy <id>",
 		Short: "Copy the invoice to a new draft",
-		Example: `  bexio kb-invoice copy 4 --contact-id 17
-  bexio kb-invoice copy 4 --contact-id 17 --title "Copy" --is-valid-from 2026-09-01`,
+		Example: `  bexio invoice copy 4 --contact-id 17
+  bexio invoice copy 4 --contact-id 17 --title "Copy" --is-valid-from 2026-09-01`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateOutput(); err != nil {
@@ -556,7 +556,7 @@ func newInvoiceSendCmd() *cobra.Command {
 		Long: `Send the invoice by email through bexio. The message must contain the
 placeholder "[Network Link]" (replaced with the customer link to the
 invoice).`,
-		Example: `  bexio kb-invoice send 4 --recipient-email anna@example.com \
+		Example: `  bexio invoice send 4 --recipient-email anna@example.com \
       --subject "Invoice RE-00004" --message "Hello, please find your invoice here: [Network Link]" \
       --attach-pdf`,
 		Args: cobra.ExactArgs(1),
@@ -683,8 +683,8 @@ func newInvoicePaymentCmd() *cobra.Command {
 	create := &cobra.Command{
 		Use:   "create <invoice-id>",
 		Short: "Record a payment on an invoice",
-		Example: `  bexio kb-invoice payment create 4 --value 150.00
-  bexio kb-invoice payment create 4 --value 150.00 --date 2026-08-21 --bank-account-id 1`,
+		Example: `  bexio invoice payment create 4 --value 150.00
+  bexio invoice payment create 4 --value 150.00 --date 2026-08-21 --bank-account-id 1`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateOutput(); err != nil {
@@ -821,8 +821,8 @@ func newInvoiceReminderCmd() *cobra.Command {
 
 Searchable fields: title, reminder_level, is_sent, is_valid_from,
 is_valid_to.`,
-		Example: `  bexio kb-invoice reminder search 4 --where is_sent=false
-  bexio kb-invoice reminder search 4 --where reminder_level=2 -o json`,
+		Example: `  bexio invoice reminder search 4 --where is_sent=false
+  bexio invoice reminder search 4 --where reminder_level=2 -o json`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateOutput(); err != nil {
@@ -889,8 +889,8 @@ is_valid_to.`,
 		Short: "Create the next payment reminder",
 		Long: `Create the next payment reminder for an overdue invoice. The API picks
 the next reminder level automatically; all flags are optional.`,
-		Example: `  bexio kb-invoice reminder create 4
-  bexio kb-invoice reminder create 4 --title "2nd reminder" --reminder-period-in-days 10`,
+		Example: `  bexio invoice reminder create 4
+  bexio invoice reminder create 4 --title "2nd reminder" --reminder-period-in-days 10`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateOutput(); err != nil {
@@ -971,7 +971,7 @@ the next reminder level automatically; all flags are optional.`,
 		Short: "Send the reminder by email",
 		Long: `Send the reminder by email through bexio. The message must contain the
 placeholder "[Network Link]".`,
-		Example: `  bexio kb-invoice reminder send 4 2 --recipient-email anna@example.com \
+		Example: `  bexio invoice reminder send 4 2 --recipient-email anna@example.com \
       --subject "Payment reminder" --message "Please pay: [Network Link]"`,
 		Args: cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -1073,14 +1073,14 @@ func newInvoicePositionCmd() *cobra.Command {
 		Short: "Add, update, or delete positions of an invoice",
 		Long: `Manage the positions of an existing invoice. Position specs use the
 same "type=...,field=value,..." syntax as "kb-invoice create --position";
-"bexio kb-invoice view <id>" shows the current positions with their ids.`,
+"bexio invoice view <id>" shows the current positions with their ids.`,
 	}
 	add := &cobra.Command{
 		Use:   "add <invoice-id> <spec>",
 		Short: "Add a position",
-		Example: `  bexio kb-invoice position add 4 "type=article,article_id=5,amount=2"
-  bexio kb-invoice position add 4 "type=custom,text=Consulting,amount=8,unit_price=150"
-  bexio kb-invoice position add 4 "type=text,text=Payable within 30 days"`,
+		Example: `  bexio invoice position add 4 "type=article,article_id=5,amount=2"
+  bexio invoice position add 4 "type=custom,text=Consulting,amount=8,unit_price=150"
+  bexio invoice position add 4 "type=text,text=Payable within 30 days"`,
 		Args: cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateOutput(); err != nil {
