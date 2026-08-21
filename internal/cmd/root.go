@@ -42,8 +42,9 @@ environment variable.
 Every read command supports "-o json" for machine-readable output (raw
 bexio API objects, exact field names from docs.bexio.com).
 
-Run "bexio docs" for the complete reference in one page (recommended
-for LLM/agent use).`,
+Run "bexio docs" for a compact reference plus a command index
+(recommended for LLM/agent use), and "bexio docs <command>" for one
+resource's flags and examples.`,
 		Version:       version,
 		SilenceUsage:  true,
 		SilenceErrors: true,

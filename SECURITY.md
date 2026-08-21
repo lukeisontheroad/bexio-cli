@@ -25,4 +25,16 @@ on this repository. You will receive a response within a few days.
 - The OAuth redirect listener binds to localhost only, validates the
   `state` parameter, and uses PKCE (S256).
 - `--verbose` logs request URLs (not the token) to stderr.
+- OAuth logins request only the scopes of the selected modules. Modules
+  that authorize money movement (`banking-payments`) or personal data
+  (`payroll`) are opt-in: they are never part of the "all" selection and
+  must be named explicitly. `bank_payment_edit` is likewise kept out of the
+  `purchase` module, because that scope also unlocks `/4.0/banking/payments`.
+- `--read-only` logins request only read (`_show`) scopes, so bexio itself
+  rejects writes. Three scopes have no read-only variant (`file`,
+  `accounting`, `stock_edit`); for those the client-side guard in
+  `Client.ReadOnly` is the only enforcement, refusing every non-GET request
+  except `.../search`.
+- Commands that instruct real bank transfers require an explicit `--force`
+  flag; there is no interactive auto-confirmation.
 - Dependencies are scanned with govulncheck in CI and updated via Dependabot.

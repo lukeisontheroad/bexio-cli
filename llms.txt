@@ -1,11 +1,14 @@
 # bexio-cli
 
-> Command-line client for the bexio business software: contacts, quotes,
-> sales orders, invoices (with payments and reminders), items & stock,
-> deliveries, projects & timesheets, notes & tasks, and master data.
-> Single static Go binary, configured via ~/.config/bexio/config.yml or the
-> BEXIO_TOKEN environment variable; supports several bexio companies as
-> named instances.
+> Command-line client for the bexio business software, covering the
+> documented API surface: contacts, quotes, sales orders, invoices (with
+> payments and reminders), items & stock, deliveries, purchase (supplier
+> bills, expenses, purchase orders, outgoing payments), accounting (manual
+> entries, accounts, journal), files, projects & timesheets, notes & tasks,
+> payroll, banking payments, and master data. Single static Go binary,
+> configured via ~/.config/bexio/config.yml or the BEXIO_TOKEN environment
+> variable; supports several bexio companies as named instances, and a
+> read-only mode for agents that only need lookups.
 
 The CLI is self-documenting for LLMs: run `bexio docs` for a compact
 reference (conventions, search syntax, command index), then
